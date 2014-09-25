@@ -11,6 +11,8 @@ export {
 		Exploit
 	};
 
+	## This contains a list of MIME types that would typically be
+	## seen as droppers after the exploitation of ShellShock.
 	const post_exploit_file_types: set[string] = {
 		"application/x-dosexec"
 	} &redef;
