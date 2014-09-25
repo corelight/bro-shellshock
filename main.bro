@@ -14,7 +14,8 @@ export {
 	## This contains a list of MIME types that would typically be
 	## seen as droppers after the exploitation of ShellShock.
 	const post_exploit_file_types: set[string] = {
-		"application/x-dosexec"
+		"application/x-executable", ##< elf executables (and some others)
+		"application/x-dosexec",    ##< windows executables in case someone is exploiting cygwin
 	} &redef;
 
 	redef enum HTTP::Tags += {
