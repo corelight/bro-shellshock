@@ -31,7 +31,7 @@ Demo
 ----
 
 This repository includes an example packet capture that exploits an 
-example server named exploit.pca.  Here are the relevant logs that are output.
+example server named exploit.pcap.  Here are the relevant logs that are output.
 
 notice.log
 
@@ -63,6 +63,10 @@ http.log
 
 Installation
 ------------
+
+This repository uses the module loading mechanism in Bro so you can simply 
+load this whole directory.  The directions below reflect that model of loading
+the shellshock detector.
 
 	cd <prefix>/share/bro/site
 	git clone --recursive https://github.com/broala/bro-shellshock.git shellshock
