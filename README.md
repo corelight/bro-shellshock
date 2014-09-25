@@ -33,7 +33,7 @@ Demo
 This repository includes an example packet capture that exploits an 
 example server named exploit.pca.  Here are the relevant logs that are output.
 
-notice.log::
+notice.log
 
 	#separator \x09
 	#set_separator	,
@@ -47,7 +47,7 @@ notice.log::
 	#close	2014-09-25-13-46-45
 
 
-http.log::
+http.log
 
 	#separator \x09
 	#set_separator	,
@@ -63,8 +63,6 @@ http.log::
 
 Installation
 ------------
-
-::
 
 	cd <prefix>/share/bro/site
 	git clone --recursive https://github.com/broala/bro-shellshock.git shellshock
