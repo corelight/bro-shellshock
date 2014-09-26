@@ -40,11 +40,11 @@ notice.log
 	#empty_field	(empty)
 	#unset_field	-
 	#path	notice
-	#open	2014-09-25-13-46-45
-	#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	fuid	file_mime_type	file_desc	proto	note	msg	sub	src	dst	p	n	peer_descr	actions	suppress_for	dropped	remote_location.country_code	remote_location.region	remote_location.city	remote_location.latitude	remote_location.longitude
+	#open	2014-09-26-10-47-02
+	#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	fuid	file_mime_type	file_desc	proto	note	msg	sub	src	dst	p	peer_descr	actions	suppress_for	dropped	remote_location.country_code	remote_location.region	remote_location.city	remote_location.latitude	remote_location.longitude
 	#types	time	string	addr	port	addr	port	string	string	string	enum	enum	string	string	addr	addr	port	count	string	set[enum]	interval	bool	string	string	string	double	double
-	1411666207.588581	-	-	-	-	-	-	-	-	-	ShellShock::Exploit	High likelyhood of successful CVE-2014-6271 exploitation against 10.246.50.6.	Sent a ping to 10.246.50.2 within 0.000 seconds of an attack.	10.246.50.6	-	-	-	bro	Notice::ACTION_LOG	3600.000000	F	-	-	-	-	-
-	#close	2014-09-25-13-46-45
+	1411666207.583791	-	-	-	-	-	-	-	-	-	ShellShock::Scanner	10.246.50.2 sent at least 1 CVE-2014-6271 exploit attempts in 0m0s.	Used payload: "() { :;}; /bin/ping -c1 10.246.50.2" Against hosts: 10.246.50.6	10.246.50.2	-	-	-	bro	Notice::ACTION_LOG	3600.00000-
+	1411666207.588581	-	-	-	-	-	-	-	-	-	ShellShock::Exploit	High likelihood of successful CVE-2014-6271 exploitation against 10.246.50.6.  Attack over HTTP and sent a ping to 10.246.50.2 within 0.000 seconds of an attack.	Attack over HTTP and sent a ping to 10.246.50.2 within 0.000 seconds of an attack.	10.246.50.6	-	-	-	bro	Notice::ACTION_LOG	3600.000000	F	-	-	-	-	-
 
 
 http.log
@@ -54,11 +54,11 @@ http.log
 	#empty_field	(empty)
 	#unset_field	-
 	#path	http
-	#open	2014-09-25-13-46-45
+	#open	2014-09-26-10-47-02
 	#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	trans_depth	method	host	uri	referrer	user_agent	request_body_len	response_body_len	status_code	status_msg	info_code	info_msg	filename	tags	username	password	proxied	orig_fuids	orig_mime_types	resp_fuids	resp_mime_types
 	#types	time	string	addr	port	addr	port	count	string	string	string	string	string	count	count	count	string	count	string	string	set[enum]	string	string	set[string]	vector[string]	vector[string]	vector[string]	vector[string]
-	1411666207.583791	CRyZah1yxhmar8Xsje	10.246.50.2	43616	10.246.50.6	80	1	GET	10.246.50.6	/exploitable.cgi	-	() { :;}; /bin/ping -c1 10.246.50.2	0	615	500	Internal Server Error	-	-	-	ShellShock::HIT	-	-	-	-	-	FgVgjb1GU12ixSuugc	text/html
-	#close	2014-09-25-13-46-45
+	1411666207.583791	CC7s232GDnmtxZUly5	10.246.50.2	43616	10.246.50.6	80	1	GET	10.246.50.6	/exploitable.cgi	-	() { :;}; /bin/ping -c1 10.246.50.2	0	615	500	Internal Server Error	-	-	-	ShellShock::HIT	-	-	-	-	-	FgVgjb1GU12ixSuugc	text/html
+	#close	2014-09-26-10-47-02
 
 
 Installation
@@ -72,6 +72,23 @@ the shellshock detector.
 	git clone --recursive https://github.com/broala/bro-shellshock.git shellshock
 	echo "@load shellshock" >> local.bro
 
+
+Configuration
+-------------
+
+There are a couple of configuration variables.
+
+	## The number of apparent attacks a host must send for it to be 
+	## detected as ShellShock::Scanner.
+	const scan_threshold = 10 &redef;
+
+	## The period over which scanner detection is performed.
+	const scan_detection_period = 10min &redef;
+
+These can be used to expand how long ShellShock scanned are watched for
+and the number of attacks that need to happen before they are declared
+to be scanning and have a notice created.
+
 Author
 ------
 
@@ -80,7 +97,7 @@ Author
 Thanks
 ------
 
-	Stephen Hosom - for providing a fully exploiting packet capture.
-
-
+	Stephen Hosom   - Provided a fully exploiting packet capture.
+	Nick Weaver     - Valuable discussion on how shellshock is and isn't exploitable.
+	Vlad Grigorescu - Feature request after feature request.
 
