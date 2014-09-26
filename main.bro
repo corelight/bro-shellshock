@@ -2,7 +2,9 @@
 @load base/frameworks/notice
 @load base/protocols/http
 @load base/utils/time
-@load-sigs ./shellshock-http.sig
+
+@load-sigs ./shellshock-http
+@load-sigs ./file-mimetypes
 
 module ShellShock;
 
@@ -30,6 +32,8 @@ export {
 	const post_exploit_file_types: set[string] = {
 		"application/x-executable", ##< elf executables (and some others)
 		"application/x-dosexec",    ##< windows executables in case someone is exploiting cygwin
+		"text/x-php",
+		"text/x-perl",
 	} &redef;
 
 	## The pattern for matching shellshock attacks.  This is 
