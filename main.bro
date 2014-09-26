@@ -174,7 +174,7 @@ event bro_init()
 	                  	NOTICE([$note=Scanner,
 	                  	        $src=key$host,
 	                  	        $msg=fmt("%s sent at least %d CVE-2014-6271 exploit attempts in %s.", key$host, total_attacks, duration_to_mins_secs(period)),
-	                  	        $sub=fmt("Used payload: \"%s\" Against hosts: %s", payload, victim_addrs),
+	                  	        $sub=fmt("Used payload: \"%s\" against sample victim hosts: %s", payload, victim_addrs),
 	                  	        $identifier=cat(key$host)]);
 	                  	}]);
 

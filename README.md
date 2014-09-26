@@ -43,7 +43,7 @@ notice.log
 	#open	2014-09-26-10-47-02
 	#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	fuid	file_mime_type	file_desc	proto	note	msg	sub	src	dst	p	peer_descr	actions	suppress_for	dropped	remote_location.country_code	remote_location.region	remote_location.city	remote_location.latitude	remote_location.longitude
 	#types	time	string	addr	port	addr	port	string	string	string	enum	enum	string	string	addr	addr	port	count	string	set[enum]	interval	bool	string	string	string	double	double
-	1411666207.583791	-	-	-	-	-	-	-	-	-	ShellShock::Scanner	10.246.50.2 sent at least 1 CVE-2014-6271 exploit attempts in 0m0s.	Used payload: "() { :;}; /bin/ping -c1 10.246.50.2" Against hosts: 10.246.50.6	10.246.50.2	-	-	-	bro	Notice::ACTION_LOG	3600.00000-
+	1411666207.583791	-	-	-	-	-	-	-	-	-	ShellShock::Scanner	10.246.50.2 sent at least 1 CVE-2014-6271 exploit attempts in 0m0s.	Used payload: "() { :;}; /bin/ping -c1 10.246.50.2" :: against sample victim hosts: 10.246.50.6	10.246.50.2	-	-	-	bro	Notice::ACTION_LOG	3600.00000-
 	1411666207.588581	-	-	-	-	-	-	-	-	-	ShellShock::Exploit	High likelihood of successful CVE-2014-6271 exploitation against 10.246.50.6.  Attack over HTTP and sent a ping to 10.246.50.2 within 0.000 seconds of an attack.	Attack over HTTP and sent a ping to 10.246.50.2 within 0.000 seconds of an attack.	10.246.50.6	-	-	-	bro	Notice::ACTION_LOG	3600.000000	F	-	-	-	-	-
 
 
