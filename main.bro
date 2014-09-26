@@ -90,12 +90,12 @@ event bro_init()
 	                  		if ( http_attacks$num > 0 )
 	                  			{
 	                  			attack_msg = fmt("%s HTTP", attack_msg);
-	                  			attack_time = http_attacks$begin;
+	                  			attack_time = http_attacks$end;
 	                  			}
 	                  		else if ( dhcp_attacks$num > 0 )
 	                  			{
 	                  			attack_msg = fmt("%s DHCP", attack_msg);
-	                  			attack_time = dhcp_attacks$begin;
+	                  			attack_time = dhcp_attacks$end;
 	                  			}
 
 	                  		if ( exploit_file$num > 0 )
