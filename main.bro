@@ -56,21 +56,25 @@ event bro_init()
 	                             $apply=set(SumStats::LAST),
 	                             $num_last_elements=1);
 
-	local r2 = SumStats::Reducer($stream="shellshock.possible_dhcp_victim", 
+	local r2 = SumStats::Reducer($stream="shellshock.possible_smtp_victim", 
 	                             $apply=set(SumStats::LAST),
 	                             $num_last_elements=1);
 
-	local r3 = SumStats::Reducer($stream="shellshock.possible_post_exploit_file", 
+	local r3 = SumStats::Reducer($stream="shellshock.possible_dhcp_victim", 
 	                             $apply=set(SumStats::LAST),
 	                             $num_last_elements=1);
 
-	local r4 = SumStats::Reducer($stream="shellshock.possible_post_exploit_ping", 
+	local r4 = SumStats::Reducer($stream="shellshock.possible_post_exploit_file", 
+	                             $apply=set(SumStats::LAST),
+	                             $num_last_elements=1);
+
+	local r5 = SumStats::Reducer($stream="shellshock.possible_post_exploit_ping", 
 	                             $apply=set(SumStats::LAST),
 	                             $num_last_elements=1);
 
 	SumStats::create([$name="look-for-shellshock",
 	                  $epoch=5mins,
-	                  $reducers=set(r1, r2, r3, r4),
+	                  $reducers=set(r1, r2, r3, r4, r5),
 	                  $threshold_val(key: SumStats::Key, result: SumStats::Result): double =
 	                  	{
 	                  	local exploit_file = result["shellshock.possible_post_exploit_file"];
@@ -81,8 +85,9 @@ event bro_init()
 	                  $threshold_crossed(key: SumStats::Key, result: SumStats::Result) = 
 	                  	{
 	                  	local http_attacks = result["shellshock.possible_http_victim"];
+	                  	local smtp_attacks = result["shellshock.possible_smtp_victim"];
 	                  	local dhcp_attacks = result["shellshock.possible_dhcp_victim"];
-	                  	local total_attacks = http_attacks$num + dhcp_attacks$num;
+	                  	local total_attacks = http_attacks$num + smtp_attacks$num + dhcp_attacks$num;
 	                  	
 	                  	local exploit_file = result["shellshock.possible_post_exploit_file"];
 	                  	local exploit_ping = result["shellshock.possible_post_exploit_ping"];
@@ -95,6 +100,11 @@ event bro_init()
 	                  			{
 	                  			attack_msg = fmt("%s HTTP", attack_msg);
 	                  			attack_time = http_attacks$end;
+	                  			}
+	                  		else if ( smtp_attacks$num > 0 )
+	                  			{
+	                  			attack_msg = fmt("%s SMTP", attack_msg);
+	                  			attack_time = smtp_attacks$end;
 	                  			}
 	                  		else if ( dhcp_attacks$num > 0 )
 	                  			{
@@ -112,7 +122,7 @@ event bro_init()
 	                  				exploit_msg += " and ";
 
 	                  			local ping_dst = SumStats::get_last(exploit_ping)[0]$str;
-	                  			exploit_msg = fmt("%ssent a ping to %s within %.3f seconds of an attack.", exploit_msg, ping_dst, exploit_ping$begin-attack_time);
+	                  			exploit_msg = fmt("%ssent a ping to %s within %.2f seconds of an attack.", exploit_msg, ping_dst, exploit_ping$begin-attack_time);
 	                  			}
 
 	                  		NOTICE([$note=Exploit,
@@ -124,49 +134,65 @@ event bro_init()
 	                  	}]);
 
 
-	local r5 = SumStats::Reducer($stream="shellshock.possible_http_attacker", 
+	local r6 = SumStats::Reducer($stream="shellshock.possible_http_attacker", 
 	                             $apply=set(SumStats::SAMPLE),
 	                             $num_samples=5);
 
-	local r6 = SumStats::Reducer($stream="shellshock.possible_dhcp_attacker", 
+	local r7 = SumStats::Reducer($stream="shellshock.possible_smtp_attacker", 
+	                             $apply=set(SumStats::SAMPLE),
+	                             $num_samples=5);
+
+	local r8 = SumStats::Reducer($stream="shellshock.possible_dhcp_attacker", 
 	                             $apply=set(SumStats::SAMPLE),
 	                             $num_samples=5);
 
 	SumStats::create([$name="shellshock-find-scanners",
 	                  $epoch=scan_detection_period,
-	                  $reducers=set(r5, r6),
+	                  $reducers=set(r6, r7, r8),
 	                  $threshold_val(key: SumStats::Key, result: SumStats::Result): double =
 	                  	{
 	                  	local http_attacks = result["shellshock.possible_http_attacker"];
+	                  	local smtp_attacks = result["shellshock.possible_smtp_attacker"];
 	                  	local dhcp_attacks = result["shellshock.possible_dhcp_attacker"];
-	                  	return http_attacks$num + dhcp_attacks$num + 0.0;
+	                  	return http_attacks$num + smtp_attacks$num + dhcp_attacks$num + 0.0;
 	                  	},
 	                  $threshold = scan_threshold + 0.0,
 	                  $threshold_crossed(key: SumStats::Key, result: SumStats::Result) = 
 	                  	{
 	                  	local http_attacks = result["shellshock.possible_http_attacker"];
+	                  	local smtp_attacks = result["shellshock.possible_smtp_attacker"];
 	                  	local dhcp_attacks = result["shellshock.possible_dhcp_attacker"];
-	                  	local total_attacks = http_attacks$num + dhcp_attacks$num;
+	                  	local total_attacks = http_attacks$num + smtp_attacks$num + dhcp_attacks$num;
 
 	                  	local payload = "";
 	                  	local period = 0secs;
 	                  	local victim_addrs = "";
+	                  	local i = 0;
 	                  	if ( http_attacks$num > 0 )
 	                  		{
 	                  		period = http_attacks$end - http_attacks$begin;
-	                  		for ( http_i in http_attacks$samples )
+	                  		for ( i in http_attacks$samples )
 	                  			{
-	                  			payload = http_attacks$samples[http_i]$str;
-	                  			victim_addrs = fmt("%s%s%s", victim_addrs, |victim_addrs|>0 ? ", " : "", http_attacks$samples[http_i]$shellshock_victim);
+	                  			payload = http_attacks$samples[i]$str;
+	                  			victim_addrs = fmt("%s%s%s", victim_addrs, |victim_addrs|>0 ? ", " : "", http_attacks$samples[i]$shellshock_victim);
+	                  			}
+	                  		}
+	                  	else if ( smtp_attacks$num > 0 )
+	                  		{
+	                  		period = smtp_attacks$end - smtp_attacks$begin;
+	                  		for ( i in smtp_attacks$samples )
+	                  			{
+	                  			payload = dhcp_attacks$samples[i]$str;
+	                  			victim_addrs = fmt("%s%s%s", victim_addrs, |victim_addrs|>0 ? ", " : "", smtp_attacks$samples[i]$shellshock_victim);
 	                  			}
 	                  		}
 	                  	else if ( dhcp_attacks$num > 0 )
 	                  		{
 	                  		period = dhcp_attacks$end - dhcp_attacks$begin;
-	                  		for ( http_i in dhcp_attacks$samples )
+	                  		for ( i in dhcp_attacks$samples )
 	                  			{
-	                  			payload = dhcp_attacks$samples[http_i]$str;
-	                  			victim_addrs = fmt("%s%s%s", victim_addrs, |victim_addrs|>0 ? ", " : "", dhcp_attacks$samples[http_i]$shellshock_victim);
+	                  			payload = dhcp_attacks$samples[i]$str;
+	                  			victim_addrs = fmt("%s%s%s", victim_addrs, |victim_addrs|>0 ? ", " : "", dhcp_attacks$samples[i]$shellshock_victim);
 	                  			}
 	                  		}
 
@@ -196,6 +222,17 @@ function ShellShock::http_header_sig_match(state: signature_state, data: string)
 
 	return F;
 	}
+
+event smtp_request(c: connection, is_orig: bool, command: string, arg: string)
+	{
+	if ( command == /[mM][aA][iI][lL]/ && /^[fF][rR][oO][mM]:/ in arg &&
+	     matcher in arg )
+		{
+		SumStats::observe("shellshock.possible_smtp_victim", [$host=c$id$resp_h], [$str=arg]);
+		SumStats::observe("shellshock.possible_smtp_attacker", [$host=c$id$orig_h], [$str=arg, $shellshock_victim=c$id$resp_h]);
+		}
+	}
+
 
 event dhcp_ack(c: connection, msg: dhcp_msg, mask: addr, router: dhcp_router_list, lease: interval, serv_addr: addr, host_name: string)
 	{
