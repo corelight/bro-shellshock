@@ -34,6 +34,7 @@ export {
 		"application/x-dosexec",    ##< windows executables in case someone is exploiting cygwin
 		"text/x-php",
 		"text/x-perl",
+		"text/x-shellscript",
 	} &redef;
 
 	## The pattern for matching shellshock attacks.  This is 
