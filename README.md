@@ -100,4 +100,4 @@ Thanks
 	Stephen Hosom   - Provided a fully exploiting packet capture.
 	Nick Weaver     - Valuable discussion on how shellshock is and isn't exploitable.
 	Vlad Grigorescu - Feature request after feature request.
-
+	Mike Patterson  - Suggesting to watch for shellscripts as an post-exploit dropper.
