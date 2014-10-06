@@ -248,6 +248,9 @@ event file_over_new_connection(f: fa_file, c: connection, is_orig: bool)
 	{
 	if ( f?$mime_type && f$mime_type in post_exploit_file_types )
 		{
+		if ( is_orig && f$source == "HTTP" )
+			return;
+
 		local host = is_orig ? c$id$resp_h : c$id$orig_h;
 		SumStats::observe("shellshock.possible_post_exploit_file", [$host=host], [$str=f$mime_type]);
 		}
