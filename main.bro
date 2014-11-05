@@ -2,6 +2,7 @@
 @load base/frameworks/notice
 @load base/protocols/http
 @load base/utils/time
+@load base/utils/addrs
 
 @load-sigs ./shellshock-http
 @load-sigs ./file-mimetypes
@@ -96,26 +97,27 @@ event bro_init()
 	                  		{
 	                  		local attack_msg = "Attack over";
 	                  		local exploit_msg = "";
-	                  		local attack_time: time;
+	                  		local detect_interval: interval;
+
 	                  		if ( http_attacks$num > 0 )
 	                  			{
 	                  			attack_msg = fmt("%s HTTP", attack_msg);
-	                  			attack_time = http_attacks$end;
+	                  			detect_interval = exploit_file$begin-http_attacks$end;
 	                  			}
 	                  		else if ( smtp_attacks$num > 0 )
 	                  			{
 	                  			attack_msg = fmt("%s SMTP", attack_msg);
-	                  			attack_time = smtp_attacks$end;
+	                  			detect_interval = exploit_file$begin-smtp_attacks$end;
 	                  			}
 	                  		else if ( dhcp_attacks$num > 0 )
 	                  			{
 	                  			attack_msg = fmt("%s DHCP", attack_msg);
-	                  			attack_time = dhcp_attacks$end;
+	                  			detect_interval = exploit_file$begin-dhcp_attacks$end;
 	                  			}
 
 	                  		if ( exploit_file$num > 0 )
 	                  			{
-	                  			exploit_msg = fmt("requested a potential dropper within %.3f seconds of an attack", exploit_file$begin-attack_time);
+	                  			exploit_msg = fmt("requested a potential dropper within %.2f seconds of an attack", detect_interval);
 	                  			}
 	                  		if ( exploit_ping$num > 0 )
 	                  			{
@@ -123,7 +125,7 @@ event bro_init()
 	                  				exploit_msg += " and ";
 
 	                  			local ping_dst = SumStats::get_last(exploit_ping)[0]$str;
-	                  			exploit_msg = fmt("%ssent a ping to %s within %.2f seconds of an attack.", exploit_msg, ping_dst, exploit_ping$begin-attack_time);
+	                  			exploit_msg = fmt("%ssent a ping to %s within %.2f seconds of an attack.", exploit_msg, ping_dst, detect_interval);
 	                  			}
 
 	                  		NOTICE([$note=Exploit,
@@ -208,7 +210,6 @@ event bro_init()
 	                  	        $sub=fmt("Used payload: \"%s\" against sample victim hosts: %s", payload, victim_addrs),
 	                  	        $identifier=cat(key$host)]);
 	                  	}]);
-
 	}
 
 
@@ -244,17 +245,41 @@ event dhcp_ack(c: connection, msg: dhcp_msg, mask: addr, router: dhcp_router_lis
 		}
 	}
 
-event file_over_new_connection(f: fa_file, c: connection, is_orig: bool)
+function observe_post_exploit_file(c: connection, f: fa_file, mime_type: string)
 	{
-	if ( f?$mime_type && f$mime_type in post_exploit_file_types )
-		{
-		if ( is_orig && f$source == "HTTP" )
-			return;
+	if ( f$info$is_orig && f$source == "HTTP" )
+		return;
 
-		local host = is_orig ? c$id$resp_h : c$id$orig_h;
-		SumStats::observe("shellshock.possible_post_exploit_file", [$host=host], [$str=f$mime_type]);
+	if ( mime_type in post_exploit_file_types )
+		{
+		local host = f$is_orig ? c$id$resp_h : c$id$orig_h;
+		SumStats::observe("shellshock.possible_post_exploit_file", [$host=host], [$str=mime_type]);
 		}
 	}
+
+# Deal with version compatibility issues
+@if ( /2\.(3\-[23]|4)/ in bro_version() )
+
+event file_mime_type(f: fa_file, mime_type: string)
+	{
+	for ( cid in f$conns )
+		{
+		local c = f$conns[cid];
+		observe_post_exploit_file(c, f, mime_type);
+		}
+	}
+
+@else
+
+event file_over_new_connection(f: fa_file, c: connection, is_orig: bool)
+	{
+	if ( f?$mime_type )
+		{
+		observe_post_exploit_file(c, f, f$mime_type);
+		}
+	}
+
+@endif
 
 event icmp_echo_request(c: connection, icmp: icmp_conn, id: count, seq: count, payload: string)
 	{
