@@ -258,8 +258,7 @@ function observe_post_exploit_file(c: connection, f: fa_file, mime_type: string)
 	}
 
 # Deal with version compatibility issues
-@if ( /2\.(3\-[23]|4)/ in bro_version() )
-
+@if ( /2\.(3\-[23])/ in bro_version() )
 event file_mime_type(f: fa_file, mime_type: string)
 	{
 	for ( cid in f$conns )
@@ -269,8 +268,6 @@ event file_mime_type(f: fa_file, mime_type: string)
 		}
 	}
 
-@else
-
 event file_over_new_connection(f: fa_file, c: connection, is_orig: bool)
 	{
 	if ( f?$mime_type )
@@ -278,6 +275,32 @@ event file_over_new_connection(f: fa_file, c: connection, is_orig: bool)
 		observe_post_exploit_file(c, f, f$mime_type);
 		}
 	}
+@endif
+
+# Deal with version compatibility issues
+@if ( /2\.(3\-[78]|4)/ in bro_version() )
+event file_sniff(f: fa_file, meta: fa_metadata)
+	{
+	if ( meta?$mime_type )
+		{
+		for ( cid in f$conns )
+			{
+			local c = f$conns[cid];
+			observe_post_exploit_file(c, f, meta$mime_type);
+			}
+		}
+	}
+
+event file_over_new_connection(f: fa_file, c: connection, is_orig: bool)
+	{
+	if ( f$info?$mime_type )
+		{
+		observe_post_exploit_file(c, f, f$info$mime_type);
+		}
+	}
+@endif
+
+
 
 @endif
 
