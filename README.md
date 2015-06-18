@@ -27,6 +27,13 @@ tag is: ShellShock::HIT.
 For what it's worth, this script is cluster-aware and should work on
 Bro clusters just fine and should be ok to run operationally.
 
+Support
+-------
+
+This script currently supports Bro 2.3 and 2.4.  Reach out to us at 
+info@broala.com if this script is giving you trouble on any supported
+version of Bro.
+
 Demo
 ----
 
@@ -100,4 +107,4 @@ Thanks
 	Stephen Hosom   - Provided a fully exploiting packet capture.
 	Nick Weaver     - Valuable discussion on how shellshock is and isn't exploitable.
 	Vlad Grigorescu - Feature request after feature request.
-	Mike Patterson  - Suggesting to watch for shellscripts as an post-exploit dropper.
+	Mike Patterson  - Suggesting to watch for shellscripts as a post-exploit dropper.

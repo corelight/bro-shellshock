@@ -300,10 +300,6 @@ event file_over_new_connection(f: fa_file, c: connection, is_orig: bool)
 	}
 @endif
 
-
-
-@endif
-
 event icmp_echo_request(c: connection, icmp: icmp_conn, id: count, seq: count, payload: string)
 	{
 	SumStats::observe("shellshock.possible_post_exploit_ping", [$host=c$id$orig_h], [$str=cat(c$id$resp_h)]);
