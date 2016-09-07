@@ -275,10 +275,10 @@ event file_over_new_connection(f: fa_file, c: connection, is_orig: bool)
 		observe_post_exploit_file(c, f, f$mime_type);
 		}
 	}
-@endif
 
-# Deal with version compatibility issues
-@if ( /2\.(3\-[78]|4)/ in bro_version() )
+# Deal with anything newer than Bro 2.3.
+@else
+
 event file_sniff(f: fa_file, meta: fa_metadata)
 	{
 	if ( meta?$mime_type )
