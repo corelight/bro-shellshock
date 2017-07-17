@@ -1,0 +1,5 @@
+[package]
+description = Discover successful ShellShock attacks.
+tags = shellshock, detect, scripts
+script_dir = scripts
+test_command = ( cd tests && btest -d )

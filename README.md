@@ -30,9 +30,8 @@ Bro clusters just fine and should be ok to run operationally.
 Support
 -------
 
-This script currently supports Bro 2.3 and 2.4.  Reach out to us at 
-info@broala.com if this script is giving you trouble on any supported
-version of Bro.
+This script currently supports Bro 2.3, 2.4, and 2.5.  Please file a ticket
+if this script is giving you trouble on any supported version of Bro.
 
 Demo
 ----
@@ -99,7 +98,7 @@ to be scanning and have a notice created.
 Author
 ------
 
-	Seth Hall <seth@broala.com>
+	Seth Hall <seth@corelight.com>
 
 Thanks
 ------
