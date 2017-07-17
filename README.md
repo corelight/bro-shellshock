@@ -70,13 +70,8 @@ http.log
 Installation
 ------------
 
-This repository uses the module loading mechanism in Bro so you can simply 
-load this whole directory.  The directions below reflect that model of loading
-the shellshock detector.
-
-	cd <prefix>/share/bro/site
-	git clone --recursive https://github.com/broala/bro-shellshock.git shellshock
-	echo "@load shellshock" >> local.bro
+	bro-pkg refresh
+	bro-pkg install corelight/bro-shellshock
 
 
 Configuration
@@ -86,10 +81,10 @@ There are a couple of configuration variables.
 
 	## The number of apparent attacks a host must send for it to be 
 	## detected as ShellShock::Scanner.
-	const scan_threshold = 10 &redef;
+	const ShellShock::scan_threshold = 10 &redef;
 
 	## The period over which scanner detection is performed.
-	const scan_detection_period = 10min &redef;
+	const ShellShock::scan_detection_period = 10min &redef;
 
 These can be used to expand how long ShellShock scanned are watched for
 and the number of attacks that need to happen before they are declared
